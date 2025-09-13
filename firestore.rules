@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isAdmin() { return signedIn() && request.auth.token.role == 'admin'; }
+    function isSelf(userId) { return signedIn() && request.auth.uid == userId; }
+
+    match /users/{userId} {
+      // Read access to own subtree or admin
+      allow read: if isSelf(userId) || isAdmin();
+
+      match /records/{recordId} {
+        // Create: owner only, enforce ownership and sane fields
+        allow create: if isSelf(userId)
+          && request.resource.data.userId == userId
+          && request.resource.data.readingDate is string
+          && request.resource.data.previousReading is number
+          && request.resource.data.currentReading is number
+          && request.resource.data.currentReading >= request.resource.data.previousReading
+          && (!('paid' in request.resource.data) || request.resource.data.paid == false);
+
+        // Update: owner can edit usage-related fields only; admin full
+        allow update: if (
+          isSelf(userId)
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.paid == resource.data.paid
+        ) || isAdmin();
+
+        // Delete: admin only
+        allow delete: if isAdmin();
+
+        // Read for owners already covered; admin full
+        allow read: if isSelf(userId) || isAdmin();
+      }
+
+      match /settings/{docId} {
+        // Owner or admin can read/write settings; delete only admin
+        allow read, create, update: if isSelf(userId) || isAdmin();
+        allow delete: if isAdmin();
+      }
+    }
+  }
+}
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // כללי אבטחה - רק משתמשים מחוברים יכולים לגשת לנתונים שלהם
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // רשומות צריכה
+      match /records/{recordId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // הגדרות משתמש
+      match /settings/{settingId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // משפחות
+      match /families/{familyId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}
