@@ -948,6 +948,19 @@ function toggleSidebar() {
     }
 }
 
+function toggleDarkMode() {
+    const isDark = !document.body.classList.contains('dark');
+    if (isDark) {
+        document.body.classList.add('dark');
+        localStorage.setItem('darkMode', '1');
+    } else {
+        document.body.classList.remove('dark');
+        localStorage.setItem('darkMode', '0');
+    }
+    setDarkModeUI(isDark);
+    showToast(isDark ? 'מצב כהה הופעל' : 'מצב בהיר הופעל', 'info');
+}
+
 function setDarkModeUI(isDark) {
     const icon = document.getElementById('darkModeIcon');
     const iconPath = document.getElementById('darkModeIconPath');
