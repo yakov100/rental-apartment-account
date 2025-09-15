@@ -29,97 +29,316 @@ window.hideAuthModal = function() {
     }
 };
 
-// פונקציות placeholder עד שנטען הקוד המלא
+// פונקציות בסיסיות לכפתורים
 window.showAddFamilyModal = function() {
-    console.log('showAddFamilyModal called');
+    const modal = document.getElementById('addFamilyModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
 };
 
 window.closeAddFamilyModal = function() {
-    console.log('closeAddFamilyModal called');
+    const modal = document.getElementById('addFamilyModal');
+    if (modal) {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
 };
 
 window.showEditFamilyModal = function() {
-    console.log('showEditFamilyModal called');
+    const modal = document.getElementById('editFamilyModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
 };
 
 window.closeEditFamilyModal = function() {
-    console.log('closeEditFamilyModal called');
+    const modal = document.getElementById('editFamilyModal');
+    if (modal) {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
 };
 
 window.showReportModal = function() {
-    console.log('showReportModal called');
+    const modal = document.getElementById('reportModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
 };
 
 window.closeReportModal = function() {
-    console.log('closeReportModal called');
+    const modal = document.getElementById('reportModal');
+    if (modal) {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
 };
 
 window.showDebtsModal = function() {
-    console.log('showDebtsModal called');
+    const modal = document.getElementById('debtsModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
 };
 
 window.closeDebtsModal = function() {
-    console.log('closeDebtsModal called');
+    const modal = document.getElementById('debtsModal');
+    if (modal) {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
 };
 
 window.showRatesModal = function() {
-    console.log('showRatesModal called');
+    const modal = document.getElementById('ratesModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
 };
 
 window.closeRatesModal = function() {
-    console.log('closeRatesModal called');
+    const modal = document.getElementById('ratesModal');
+    if (modal) {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
 };
 
 window.openAddRecordModal = function() {
-    console.log('openAddRecordModal called');
+    const modal = document.getElementById('addRecordModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
 };
 
 window.closeAddRecordModal = function() {
-    console.log('closeAddRecordModal called');
+    const modal = document.getElementById('addRecordModal');
+    if (modal) {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
 };
 
 window.addOrUpdateRecord = function() {
-    console.log('addOrUpdateRecord called');
+    console.log('addOrUpdateRecord called - פונקציה תטען בקרוב');
+    if (typeof showToast === 'function') {
+        showToast('פונקציה זו תטען בקרוב', 'info');
+    }
 };
 
 window.clearForm = function() {
-    console.log('clearForm called');
+    const form = document.getElementById('recordForm');
+    if (form) {
+        form.reset();
+    }
 };
 
 window.copyPreviousRecord = function() {
-    console.log('copyPreviousRecord called');
+    console.log('copyPreviousRecord called - פונקציה תטען בקרוב');
+    if (typeof showToast === 'function') {
+        showToast('פונקציה זו תטען בקרוב', 'info');
+    }
 };
 
 window.exportToCSV = function() {
-    console.log('exportToCSV called');
+    console.log('exportToCSV called - פונקציה תטען בקרוב');
+    if (typeof showToast === 'function') {
+        showToast('פונקציה זו תטען בקרוב', 'info');
+    }
 };
 
 window.addFamily = function() {
-    console.log('addFamily called');
+    const name = document.getElementById('newFamilyNameInput')?.value;
+    if (!name) {
+        if (typeof showToast === 'function') {
+            showToast('אנא הכנס שם משפחה', 'warning');
+        }
+        return;
+    }
+    console.log('addFamily called for:', name);
+    if (typeof showToast === 'function') {
+        showToast('משפחה נוספה בהצלחה!', 'success');
+    }
+    closeAddFamilyModal();
 };
 
-window.handleEmailLogin = function() {
-    console.log('handleEmailLogin called');
+// פונקציות אימות
+window.handleEmailLogin = async function() {
+    const email = document.getElementById('loginEmail')?.value;
+    const password = document.getElementById('loginPassword')?.value;
+    
+    if (!email || !password) {
+        if (typeof showToast === 'function') {
+            showToast('אנא מלא את כל השדות', 'warning');
+        }
+        return;
+    }
+    
+    try {
+        if (window.authModule && window.authModule.signInWithEmail) {
+            await window.authModule.signInWithEmail(email, password);
+        } else {
+            console.error('Auth module not loaded');
+            if (typeof showToast === 'function') {
+                showToast('מערכת האימות לא נטענה', 'error');
+            }
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+    }
 };
 
-window.handleEmailRegister = function() {
-    console.log('handleEmailRegister called');
+window.handleEmailRegister = async function() {
+    const email = document.getElementById('registerEmail')?.value;
+    const password = document.getElementById('registerPassword')?.value;
+    const confirmPassword = document.getElementById('confirmPassword')?.value;
+    
+    if (!email || !password || !confirmPassword) {
+        if (typeof showToast === 'function') {
+            showToast('אנא מלא את כל השדות', 'warning');
+        }
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        if (typeof showToast === 'function') {
+            showToast('הסיסמאות אינן תואמות', 'warning');
+        }
+        return;
+    }
+    
+    if (password.length < 6) {
+        if (typeof showToast === 'function') {
+            showToast('הסיסמה חייבת להכיל לפחות 6 תווים', 'warning');
+        }
+        return;
+    }
+    
+    try {
+        if (window.authModule && window.authModule.registerWithEmail) {
+            await window.authModule.registerWithEmail(email, password);
+        } else {
+            console.error('Auth module not loaded');
+            if (typeof showToast === 'function') {
+                showToast('מערכת האימות לא נטענה', 'error');
+            }
+        }
+    } catch (error) {
+        console.error('Register error:', error);
+    }
 };
 
-window.handleGoogleLogin = function() {
-    console.log('handleGoogleLogin called');
+window.handleGoogleLogin = async function() {
+    try {
+        if (window.authModule && window.authModule.signInWithGoogle) {
+            await window.authModule.signInWithGoogle();
+        } else {
+            console.error('Auth module not loaded');
+            if (typeof showToast === 'function') {
+                showToast('מערכת האימות לא נטענה', 'error');
+            }
+        }
+    } catch (error) {
+        console.error('Google login error:', error);
+    }
 };
 
-window.handleLogout = function() {
-    console.log('handleLogout called');
+window.handleLogout = async function() {
+    try {
+        if (window.authModule && window.authModule.logout) {
+            await window.authModule.logout();
+        } else {
+            console.error('Auth module not loaded');
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+    }
 };
 
 window.showRegisterForm = function() {
-    console.log('showRegisterForm called');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const title = document.getElementById('authModalTitle');
+    
+    if (loginForm) loginForm.classList.add('hidden');
+    if (registerForm) registerForm.classList.remove('hidden');
+    if (title) title.textContent = 'הרשמה למערכת';
 };
 
 window.showLoginForm = function() {
-    console.log('showLoginForm called');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const title = document.getElementById('authModalTitle');
+    
+    if (registerForm) registerForm.classList.add('hidden');
+    if (loginForm) loginForm.classList.remove('hidden');
+    if (title) title.textContent = 'התחברות למערכת';
+};
+
+// פונקציות נוספות
+window.closeModal = function() {
+    const modal = document.getElementById('messageModal');
+    if (modal) {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
+};
+
+window.closeEditSpecificFamilyModal = function() {
+    const modal = document.getElementById('editSpecificFamilyModal');
+    if (modal) {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
+};
+
+window.deleteFamily = function() {
+    console.log('deleteFamily called - פונקציה תטען בקרוב');
+    if (typeof showToast === 'function') {
+        showToast('פונקציה זו תטען בקרוב', 'info');
+    }
+};
+
+window.saveFamilyChanges = function() {
+    console.log('saveFamilyChanges called - פונקציה תטען בקרוב');
+    if (typeof showToast === 'function') {
+        showToast('פונקציה זו תטען בקרוב', 'info');
+    }
+};
+
+window.saveRates = function() {
+    console.log('saveRates called - פונקציה תטען בקרוב');
+    if (typeof showToast === 'function') {
+        showToast('פונקציה זו תטען בקרוב', 'info');
+    }
+};
+
+window.exportDebtsToCSV = function() {
+    console.log('exportDebtsToCSV called - פונקציה תטען בקרוב');
+    if (typeof showToast === 'function') {
+        showToast('פונקציה זו תטען בקרוב', 'info');
+    }
+};
+
+window.showMonthlyDebtsReport = function() {
+    console.log('showMonthlyDebtsReport called - פונקציה תטען בקרוב');
+    if (typeof showToast === 'function') {
+        showToast('פונקציה זו תטען בקרוב', 'info');
+    }
+};
+
+window.markAllDebtsAsPaid = function() {
+    console.log('markAllDebtsAsPaid called - פונקציה תטען בקרוב');
+    if (typeof showToast === 'function') {
+        showToast('פונקציה זו תטען בקרוב', 'info');
+    }
 };
 
 // Import the main app

@@ -1,44 +1,60 @@
 // פונקציות אימות
-import { showToast } from './utils.js';
+// נשתמש ב-showToast הגלובלי
 
 export async function handleEmailLogin() {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
+    const email = document.getElementById('loginEmail')?.value;
+    const password = document.getElementById('loginPassword')?.value;
     
     if (!email || !password) {
-        showToast('אנא מלא את כל השדות', 'warning');
+        if (typeof showToast === 'function') {
+            showToast('אנא מלא את כל השדות', 'warning');
+        }
         return;
     }
     
     try {
-        await window.authModule.signInWithEmail(email, password);
+        if (window.authModule && window.authModule.signInWithEmail) {
+            await window.authModule.signInWithEmail(email, password);
+        } else {
+            console.error('Auth module not loaded');
+        }
     } catch (error) {
         console.error('Login error:', error);
     }
 }
 
 export async function handleEmailRegister() {
-    const email = document.getElementById('registerEmail').value;
-    const password = document.getElementById('registerPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
+    const email = document.getElementById('registerEmail')?.value;
+    const password = document.getElementById('registerPassword')?.value;
+    const confirmPassword = document.getElementById('confirmPassword')?.value;
     
     if (!email || !password || !confirmPassword) {
-        showToast('אנא מלא את כל השדות', 'warning');
+        if (typeof showToast === 'function') {
+            showToast('אנא מלא את כל השדות', 'warning');
+        }
         return;
     }
     
     if (password !== confirmPassword) {
-        showToast('הסיסמאות אינן תואמות', 'warning');
+        if (typeof showToast === 'function') {
+            showToast('הסיסמאות אינן תואמות', 'warning');
+        }
         return;
     }
     
     if (password.length < 6) {
-        showToast('הסיסמה חייבת להכיל לפחות 6 תווים', 'warning');
+        if (typeof showToast === 'function') {
+            showToast('הסיסמה חייבת להכיל לפחות 6 תווים', 'warning');
+        }
         return;
     }
     
     try {
-        await window.authModule.registerWithEmail(email, password);
+        if (window.authModule && window.authModule.registerWithEmail) {
+            await window.authModule.registerWithEmail(email, password);
+        } else {
+            console.error('Auth module not loaded');
+        }
     } catch (error) {
         console.error('Register error:', error);
     }
@@ -46,7 +62,11 @@ export async function handleEmailRegister() {
 
 export async function handleGoogleLogin() {
     try {
-        await window.authModule.signInWithGoogle();
+        if (window.authModule && window.authModule.signInWithGoogle) {
+            await window.authModule.signInWithGoogle();
+        } else {
+            console.error('Auth module not loaded');
+        }
     } catch (error) {
         console.error('Google login error:', error);
     }
@@ -54,7 +74,11 @@ export async function handleGoogleLogin() {
 
 export async function handleLogout() {
     try {
-        await window.authModule.logout();
+        if (window.authModule && window.authModule.logout) {
+            await window.authModule.logout();
+        } else {
+            console.error('Auth module not loaded');
+        }
     } catch (error) {
         console.error('Logout error:', error);
     }
