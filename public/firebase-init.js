@@ -94,16 +94,23 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
         
-        // בדוק מצב משתמש נוכחי
-        setTimeout(() => {
+        // בדוק מצב משתמש נוכחי - עם retry
+        let retryCount = 0;
+        const checkUserState = () => {
             const currentUser = firebase.auth().currentUser;
-            if (currentUser) {
+            const loginButton = document.getElementById('loginButton');
+            
+            if (currentUser && loginButton) {
                 console.log('Current user found on startup:', currentUser.uid);
-                if (typeof updateUserUI === 'function') {
-                    updateUserUI(currentUser);
-                }
+                updateUserUI(currentUser);
+            } else if (retryCount < 5) {
+                retryCount++;
+                console.log('Retrying user state check...', retryCount);
+                setTimeout(checkUserState, 500);
             }
-        }, 1000);
+        };
+        
+        setTimeout(checkUserState, 500);
         
         console.log('Firebase אותחל בהצלחה');
     } catch (error) {
@@ -274,6 +281,18 @@ function showToast(message, type = 'info') {
 // הפוך את הפונקציה זמינה גלובלית
 window.showToast = showToast;
 
+// פונקציה לטיפול בכפתור התחברות/התנתקות
+window.handleLoginButtonClick = function() {
+    const user = firebase.auth().currentUser;
+    if (user) {
+        // משתמש מחובר - התנתק
+        window.handleLogout();
+    } else {
+        // משתמש לא מחובר - הראה מודל התחברות
+        window.showAuthModal();
+    }
+};
+
 // פונקציה להחזרת צבע משפחה
 window.getFamilyColor = function(familyName) {
     const colors = [
@@ -310,8 +329,12 @@ window.updateUserUI = function(user) {
         
         if (loginButton) {
             loginButton.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg> התנתק';
-            loginButton.onclick = () => window.handleLogout();
-            loginButton.className = loginButton.className.replace('bg-green-500', 'bg-red-500').replace('hover:bg-green-600', 'hover:bg-red-600');
+            // החלף צבעים
+            loginButton.className = loginButton.className
+                .replace('bg-green-500', 'bg-red-500')
+                .replace('hover:bg-green-600', 'hover:bg-red-600');
+            // וודא שה-onclick מוגדר נכון
+            loginButton.setAttribute('onclick', 'handleLoginButtonClick()');
         }
         
         if (userInfoBar) {
@@ -342,8 +365,12 @@ window.updateUserUI = function(user) {
         
         if (loginButton) {
             loginButton.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg> התחבר';
-            loginButton.onclick = () => window.showAuthModal();
-            loginButton.className = loginButton.className.replace('bg-red-500', 'bg-green-500').replace('hover:bg-red-600', 'hover:bg-green-600');
+            // החלף צבעים חזרה לירוק
+            loginButton.className = loginButton.className
+                .replace('bg-red-500', 'bg-green-500')
+                .replace('hover:bg-red-600', 'hover:bg-green-600');
+            // וודא שה-onclick מוגדר נכון
+            loginButton.setAttribute('onclick', 'handleLoginButtonClick()');
         }
         
         if (userInfoBar) {
