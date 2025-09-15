@@ -154,19 +154,67 @@ window.exportToCSV = function() {
     }
 };
 
-window.addFamily = function() {
+window.addFamily = async function() {
     const name = document.getElementById('newFamilyNameInput')?.value;
+    const entryDate = document.getElementById('newFamilyEntryDateInput')?.value;
+    const phones = document.getElementById('newFamilyPhonesInput')?.value;
+    const email = document.getElementById('newFamilyEmailInput')?.value;
+    
     if (!name) {
         if (typeof showToast === 'function') {
             showToast('אנא הכנס שם משפחה', 'warning');
         }
         return;
     }
-    console.log('addFamily called for:', name);
-    if (typeof showToast === 'function') {
-        showToast('משפחה נוספה בהצלחה!', 'success');
+    
+    try {
+        const user = firebase.auth().currentUser;
+        if (user) {
+            // שמור ב-Firestore
+            const db = firebase.firestore();
+            const familyData = {
+                name: name,
+                entryDate: entryDate || null,
+                phones: phones || '',
+                email: email || '',
+                createdAt: new Date(),
+                userId: user.uid
+            };
+            
+            await db.collection('users').doc(user.uid).collection('families').add(familyData);
+            console.log('Family saved to Firestore:', name);
+        } else {
+            // שמור מקומית
+            const families = JSON.parse(localStorage.getItem('families') || '[]');
+            families.push({ name, entryDate, phones, email });
+            localStorage.setItem('families', JSON.stringify(families));
+        }
+        
+        // הוסף למשתנה גלובלי
+        if (!window.familyNames) window.familyNames = new Set();
+        window.familyNames.add(name);
+        
+        if (typeof showToast === 'function') {
+            showToast('משפחה נוספה בהצלחה!', 'success');
+        }
+        
+        // נקה את הטופס
+        document.getElementById('newFamilyNameInput').value = '';
+        document.getElementById('newFamilyEntryDateInput').value = '';
+        document.getElementById('newFamilyPhonesInput').value = '';
+        document.getElementById('newFamilyEmailInput').value = '';
+        
+        closeAddFamilyModal();
+        
+        // עדכן רשימות משפחות בממשק
+        updateFamilySelects();
+        
+    } catch (error) {
+        console.error('Error adding family:', error);
+        if (typeof showToast === 'function') {
+            showToast('שגיאה בהוספת משפחה', 'error');
+        }
     }
-    closeAddFamilyModal();
 };
 
 // פונקציות אימות
@@ -339,6 +387,37 @@ window.markAllDebtsAsPaid = function() {
     if (typeof showToast === 'function') {
         showToast('פונקציה זו תטען בקרוב', 'info');
     }
+};
+
+// פונקציות עזר
+window.updateFamilySelects = function() {
+    const selects = ['familyName', 'familyFilter', 'reportFamily', 'debtFamilyFilter'];
+    
+    selects.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (select) {
+            // שמור את הערך הנוכחי
+            const currentValue = select.value;
+            
+            // נקה אפשרויות קיימות (מלבד הראשונה)
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+            
+            // הוסף משפחות חדשות
+            if (window.familyNames) {
+                Array.from(window.familyNames).sort().forEach(familyName => {
+                    const option = document.createElement('option');
+                    option.value = familyName;
+                    option.textContent = familyName;
+                    select.appendChild(option);
+                });
+            }
+            
+            // החזר את הערך הנוכחי
+            select.value = currentValue;
+        }
+    });
 };
 
 // Import the main app

@@ -496,8 +496,26 @@
         </div>
     </div>
 
-    <script src="firebase-init.js?v=3"></script>
+    <!-- Firebase Configuration -->
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAY9ylN2pFKGBbY0uJ7rfPBbr_K66Ecq4o",
+            authDomain: "rental-apartment-account.firebaseapp.com",
+            projectId: "rental-apartment-account",
+            storageBucket: "rental-apartment-account.firebasestorage.app",
+            messagingSenderId: "225410926493",
+            appId: "1:225410926493:web:7b3849711daf698a4ed174"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        
+        console.log('Firebase initialized successfully');
+    </script>
+    
+    <script src="firebase-init.js?v=4"></script>
     <script src="firebase-data-compat.js?v=3"></script>
-    <script type="module" src="app.js?v=5"></script>
+    <script type="module" src="app.js?v=6"></script>
 </body>
 </html>

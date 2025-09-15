@@ -1,13 +1,91 @@
 // אתחול Firebase לאפליקציה
 document.addEventListener('DOMContentLoaded', async function() {
     try {
-        // המתן לטעינת מודולי Firebase
-        await loadFirebaseModules();
+        console.log('Starting Firebase app initialization...');
         
-        // התחל מעקב אחר מצב ההתחברות
-        if (window.authModule && window.authModule.onAuthChange) {
-            window.authModule.onAuthChange(updateUserUI);
+        // וודא שFirebase מאותחל
+        if (!firebase.apps.length) {
+            console.error('Firebase not initialized!');
+            throw new Error('Firebase not initialized');
         }
+        
+        // יצירת auth module פשוט
+        window.authModule = {
+            signInWithGoogle: async () => {
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    const result = await firebase.auth().signInWithPopup(provider);
+                    if (typeof showToast === 'function') {
+                        showToast('התחברת בהצלחה!', 'success');
+                    }
+                    return result.user;
+                } catch (error) {
+                    console.error('Google login error:', error);
+                    if (typeof showToast === 'function') {
+                        showToast('שגיאה בהתחברות עם Google', 'error');
+                    }
+                    throw error;
+                }
+            },
+            signInWithEmail: async (email, password) => {
+                try {
+                    const result = await firebase.auth().signInWithEmailAndPassword(email, password);
+                    if (typeof showToast === 'function') {
+                        showToast('התחברת בהצלחה!', 'success');
+                    }
+                    return result.user;
+                } catch (error) {
+                    console.error('Email login error:', error);
+                    if (typeof showToast === 'function') {
+                        showToast('שגיאה בהתחברות', 'error');
+                    }
+                    throw error;
+                }
+            },
+            registerWithEmail: async (email, password) => {
+                try {
+                    const result = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                    if (typeof showToast === 'function') {
+                        showToast('נרשמת בהצלחה!', 'success');
+                    }
+                    return result.user;
+                } catch (error) {
+                    console.error('Register error:', error);
+                    if (typeof showToast === 'function') {
+                        showToast('שגיאה בהרשמה', 'error');
+                    }
+                    throw error;
+                }
+            },
+            logout: async () => {
+                try {
+                    await firebase.auth().signOut();
+                    if (typeof showToast === 'function') {
+                        showToast('התנתקת בהצלחה', 'success');
+                    }
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    if (typeof showToast === 'function') {
+                        showToast('שגיאה בהתנתקות', 'error');
+                    }
+                }
+            }
+        };
+        
+        // התחל מעקב אחר מצב האימות
+        firebase.auth().onAuthStateChanged((user) => {
+            if (typeof updateUserUI === 'function') {
+                updateUserUI(user);
+            }
+            
+            if (user) {
+                // משתמש מחובר - טען נתונים מ-Firestore
+                loadFromFirestore();
+            } else {
+                // משתמש לא מחובר - טען נתונים מקומיים
+                loadFromLocalStorage();
+            }
+        });
         
         console.log('Firebase אותחל בהצלחה');
     } catch (error) {
@@ -251,6 +329,62 @@ window.loadFromLocalStorage = function() {
 window.loadRecords = function() {
     console.log('Loading records...');
     if (typeof loadFromLocalStorage === 'function') {
+        loadFromLocalStorage();
+    }
+};
+
+// טעינת נתונים מ-Firestore
+window.loadFromFirestore = async function() {
+    console.log('Loading from Firestore...');
+    try {
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            console.log('No user logged in, loading from local storage');
+            loadFromLocalStorage();
+            return;
+        }
+        
+        const db = firebase.firestore();
+        
+        // טען רשומות
+        const recordsRef = db.collection('users').doc(user.uid).collection('records');
+        const recordsSnapshot = await recordsRef.orderBy('readingDate', 'desc').get();
+        
+        window.records = [];
+        recordsSnapshot.forEach((doc) => {
+            window.records.push({ id: doc.id, ...doc.data() });
+        });
+        
+        console.log(`נטענו ${window.records.length} רשומות מ-Firestore`);
+        
+        // טען משפחות
+        const familiesRef = db.collection('users').doc(user.uid).collection('families');
+        const familiesSnapshot = await familiesRef.get();
+        
+        window.familyNames = new Set();
+        familiesSnapshot.forEach((doc) => {
+            window.familyNames.add(doc.data().name);
+        });
+        
+        console.log(`נטענו ${window.familyNames.size} משפחות מ-Firestore`);
+        
+        // עדכן UI
+        if (typeof renderTable === 'function') {
+            renderTable();
+        }
+        if (typeof updateCharts === 'function') {
+            updateCharts();
+        }
+        
+        if (typeof showToast === 'function') {
+            showToast('נתונים נטענו מהשרת', 'success');
+        }
+        
+    } catch (error) {
+        console.error('שגיאה בטעינה מ-Firestore:', error);
+        if (typeof showToast === 'function') {
+            showToast('שגיאה בטעינת נתונים - מעבר למצב מקומי', 'warning');
+        }
         loadFromLocalStorage();
     }
 };
