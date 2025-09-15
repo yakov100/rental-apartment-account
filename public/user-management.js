@@ -118,9 +118,15 @@ export function loadRecords() {
     }
 }
 
-function loadFromLocalStorage() {
-    const { loadRates } = require('./rates.js');
-    loadRates();
+async function loadFromLocalStorage() {
+    try {
+        const ratesModule = await import('./rates.js');
+        if (ratesModule.loadRates) {
+            ratesModule.loadRates();
+        }
+    } catch (error) {
+        console.warn('לא ניתן לטעון מודול rates:', error);
+    }
     const storedRecords = localStorage.getItem('billingRecords');
     if (storedRecords) {
         window.records = JSON.parse(storedRecords);

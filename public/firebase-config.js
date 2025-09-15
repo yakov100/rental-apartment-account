@@ -1,7 +1,5 @@
-// Firebase Configuration
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore, enableNetwork, disableNetwork } from 'firebase/firestore';
+// Firebase Configuration - Firebase v8 Compat
+// נשתמש ב-Firebase v8 שכבר נטען בדף
 
 // תצורת Firebase - נתונים אמיתיים של הפרויקט
 const firebaseConfig = {
@@ -13,23 +11,25 @@ const firebaseConfig = {
   appId: "1:225410926493:web:7b3849711daf698a4ed174"
 };
 
-// אתחול Firebase
-const app = initializeApp(firebaseConfig);
+// אתחול Firebase v8
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 
 // שירותי Firebase
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const auth = firebase.auth();
+export const db = firebase.firestore();
 
 // ניהול מצב חיבור
 let isOnline = navigator.onLine;
 
 // פונקציות עבור מצב אופליין/אונליין
 export const goOffline = () => {
-  return disableNetwork(db);
+  return db.disableNetwork();
 };
 
 export const goOnline = () => {
-  return enableNetwork(db);
+  return db.enableNetwork();
 };
 
 // מעקב אחר מצב החיבור
@@ -49,4 +49,4 @@ window.addEventListener('offline', () => {
 
 export const getConnectionStatus = () => isOnline;
 
-export default app;
+export default firebase;

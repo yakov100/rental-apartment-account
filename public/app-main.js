@@ -75,11 +75,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listeners
     const familyFilterSelect = document.getElementById('familyFilter');
     if (familyFilterSelect) {
-        familyFilterSelect.addEventListener('change', () => {
-            const { renderTable } = require('./table-rendering.js');
-            const { updateCharts } = require('./charts.js');
-            renderTable();
-            updateCharts();
+        familyFilterSelect.addEventListener('change', async () => {
+            try {
+                const tableModule = await import('./table-rendering.js');
+                const chartsModule = await import('./charts.js');
+                if (tableModule.renderTable) tableModule.renderTable();
+                if (chartsModule.updateCharts) chartsModule.updateCharts();
+            } catch (error) {
+                console.warn('לא ניתן לטעון מודולי UI:', error);
+            }
         });
     }
     

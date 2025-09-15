@@ -1,13 +1,5 @@
-// ניהול רשומות ב-Firestore
-import { 
-  updateDoc, 
-  deleteDoc, 
-  getDocs, 
-  query, 
-  orderBy, 
-  onSnapshot,
-  setDoc
-} from 'firebase/firestore';
+// ניהול רשומות ב-Firestore - Firebase v8 Compat
+// נשתמש ב-Firebase v8 שכבר נטען בדף
 import { getUserCollectionRef, getUserDocRef, localRecords, unsubscribers } from './firebase-helpers.js';
 
 // רשומות צריכה
@@ -30,13 +22,13 @@ export const saveRecord = async (record) => {
     if (record.id) {
       // עדכון רשומה קיימת
       const docRef = getUserDocRef('records', record.id);
-      await updateDoc(docRef, recordData);
+      await docRef.update(recordData);
     } else {
       // רשומה חדשה
       record.id = Date.now().toString();
       recordData.id = record.id;
       const docRef = getUserDocRef('records', record.id);
-      await setDoc(docRef, recordData);
+      await docRef.set(recordData);
     }
     
     return record;
@@ -49,7 +41,7 @@ export const saveRecord = async (record) => {
 export const deleteRecord = async (recordId) => {
   try {
     const docRef = getUserDocRef('records', recordId);
-    await deleteDoc(docRef);
+    await docRef.delete();
   } catch (error) {
     console.error('שגיאה במחיקת רשומה:', error);
     throw error;
@@ -59,8 +51,7 @@ export const deleteRecord = async (recordId) => {
 export const getRecords = async () => {
   try {
     const recordsRef = getUserCollectionRef('records');
-    const q = query(recordsRef, orderBy('readingDate', 'desc'));
-    const snapshot = await getDocs(q);
+    const snapshot = await recordsRef.orderBy('readingDate', 'desc').get();
     
     const records = [];
     snapshot.forEach((doc) => {
@@ -78,9 +69,7 @@ export const getRecords = async () => {
 export const subscribeToRecords = (callback) => {
   try {
     const recordsRef = getUserCollectionRef('records');
-    const q = query(recordsRef, orderBy('readingDate', 'desc'));
-    
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = recordsRef.orderBy('readingDate', 'desc').onSnapshot((snapshot) => {
       const records = [];
       snapshot.forEach((doc) => {
         records.push({ id: doc.id, ...doc.data() });

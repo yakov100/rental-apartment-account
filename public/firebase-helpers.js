@@ -1,7 +1,5 @@
-// פונקציות עזר ל-Firebase
-import { collection, doc } from 'firebase/firestore';
-import { db } from './firebase-config.js';
-import { getCurrentUser, requireAuth } from './auth.js';
+// פונקציות עזר ל-Firebase - Firebase v8 Compat
+// נשתמש ב-Firebase v8 שכבר נטען בדף
 
 // משתנים גלובליים לנתונים
 export let localRecords = [];
@@ -16,13 +14,15 @@ export const getUserId = () => {
 };
 
 export const getUserCollectionRef = (collectionName) => {
-  const userId = requireAuth().uid;
-  return collection(db, 'users', userId, collectionName);
+  const userId = getCurrentUser()?.uid;
+  if (!userId) throw new Error('User not authenticated');
+  return firebase.firestore().collection('users').doc(userId).collection(collectionName);
 };
 
 export const getUserDocRef = (collectionName, docId) => {
-  const userId = requireAuth().uid;
-  return doc(db, 'users', userId, collectionName, docId);
+  const userId = getCurrentUser()?.uid;
+  if (!userId) throw new Error('User not authenticated');
+  return firebase.firestore().collection('users').doc(userId).collection(collectionName).doc(docId);
 };
 
 // ניקוי מאזינים
