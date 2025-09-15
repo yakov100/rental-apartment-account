@@ -72,45 +72,33 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         };
         
+        // משתנה למניעת טעינה כפולה
+        let isDataLoaded = false;
+        
         // התחל מעקב אחר מצב האימות
         firebase.auth().onAuthStateChanged((user) => {
-            console.log('Auth state changed:', user ? 'User logged in' : 'User logged out');
+            console.log('Auth state changed:', user ? `User logged in: ${user.uid}` : 'User logged out');
             
-            // עדכן UI תמיד
-            setTimeout(() => {
-                if (typeof updateUserUI === 'function') {
-                    updateUserUI(user);
+            // עדכן UI
+            updateUserUI(user);
+            
+            // טען נתונים רק פעם אחת לכל שינוי מצב
+            if (!isDataLoaded) {
+                isDataLoaded = true;
+                
+                if (user) {
+                    // משתמש מחובר - טען רק מ-Firestore
+                    console.log('Loading data from Firestore for user:', user.uid);
+                    loadFromFirestore();
+                } else {
+                    // משתמש לא מחובר - טען רק מאחסון מקומי
+                    console.log('Loading data from local storage');
+                    loadFromLocalStorage();
                 }
-            }, 100);
-            
-            if (user) {
-                // משתמש מחובר - טען נתונים מ-Firestore
-                console.log('Loading data from Firestore for user:', user.uid);
-                setTimeout(() => loadFromFirestore(), 500);
-            } else {
-                // משתמש לא מחובר - טען נתונים מקומיים
-                console.log('Loading data from local storage');
-                setTimeout(() => loadFromLocalStorage(), 100);
             }
         });
         
-        // בדוק מצב משתמש נוכחי - עם retry
-        let retryCount = 0;
-        const checkUserState = () => {
-            const currentUser = firebase.auth().currentUser;
-            const loginButton = document.getElementById('loginButton');
-            
-            if (currentUser && loginButton) {
-                console.log('Current user found on startup:', currentUser.uid);
-                updateUserUI(currentUser);
-            } else if (retryCount < 5) {
-                retryCount++;
-                console.log('Retrying user state check...', retryCount);
-                setTimeout(checkUserState, 500);
-            }
-        };
-        
-        setTimeout(checkUserState, 500);
+        // אל תבדוק מצב נוכחי - onAuthStateChanged יטפל בזה
         
         console.log('Firebase אותחל בהצלחה');
     } catch (error) {
@@ -314,71 +302,81 @@ window.getFamilyColor = function(familyName) {
     return colors[Math.abs(hash) % colors.length];
 };
 
-// פונקציות נוספות שחסרות
+// פונקציה מרכזית לעדכון UI של המשתמש
 window.updateUserUI = function(user) {
-    console.log('updateUserUI called with user:', user);
+    console.log('updateUserUI called with user:', user ? user.uid : 'null');
     
-    const loginButton = document.getElementById('loginButton');
-    const userInfoBar = document.getElementById('userInfoBar');
-    const userDisplayName = document.getElementById('userDisplayName');
-    const userAvatar = document.getElementById('userAvatar');
-    
-    if (user && user.uid) {
-        // משתמש מחובר
-        console.log('User is logged in:', user.uid);
+    try {
+        const loginButton = document.getElementById('loginButton');
+        const userInfoBar = document.getElementById('userInfoBar');
+        const userDisplayName = document.getElementById('userDisplayName');
+        const userAvatar = document.getElementById('userAvatar');
         
-        if (loginButton) {
-            loginButton.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg> התנתק';
-            // החלף צבעים
-            loginButton.className = loginButton.className
-                .replace('bg-green-500', 'bg-red-500')
-                .replace('hover:bg-green-600', 'hover:bg-red-600');
-            // וודא שה-onclick מוגדר נכון
-            loginButton.setAttribute('onclick', 'handleLoginButtonClick()');
+        if (user && user.uid) {
+            // משתמש מחובר - עדכן UI למצב מחובר
+            updateLoginButton(loginButton, true);
+            updateUserInfo(userInfoBar, userDisplayName, userAvatar, user);
+            hideAuthModal();
+            
+            console.log('UI updated for logged in user:', user.uid);
+            
+        } else {
+            // משתמש לא מחובר - עדכן UI למצב לא מחובר
+            updateLoginButton(loginButton, false);
+            hideUserInfo(userInfoBar);
+            
+            console.log('UI updated for logged out user');
         }
-        
-        if (userInfoBar) {
-            userInfoBar.classList.remove('hidden');
-            userInfoBar.style.display = 'block';
-        }
-        if (userDisplayName) {
-            userDisplayName.textContent = user.displayName || user.email || 'משתמש';
-        }
-        if (userAvatar) {
-            userAvatar.src = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || user.email || 'User') + '&background=3B82F6&color=fff';
-        }
-        
-        // הסתר מודל האימות אם פתוח
-        const authModal = document.getElementById('authModal');
-        if (authModal) {
-            authModal.classList.remove('flex');
-            authModal.classList.add('hidden');
-        }
-        
-        if (typeof showToast === 'function') {
-            showToast('ברוך הבא, ' + (user.displayName || user.email || 'משתמש'), 'success');
-        }
-        
-    } else {
-        // משתמש לא מחובר
-        console.log('User is logged out');
-        
-        if (loginButton) {
-            loginButton.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg> התחבר';
-            // החלף צבעים חזרה לירוק
-            loginButton.className = loginButton.className
-                .replace('bg-red-500', 'bg-green-500')
-                .replace('hover:bg-red-600', 'hover:bg-green-600');
-            // וודא שה-onclick מוגדר נכון
-            loginButton.setAttribute('onclick', 'handleLoginButtonClick()');
-        }
-        
-        if (userInfoBar) {
-            userInfoBar.classList.add('hidden');
-            userInfoBar.style.display = 'none';
-        }
+    } catch (error) {
+        console.error('Error in updateUserUI:', error);
     }
 };
+
+// פונקציות עזר לעדכון UI
+function updateLoginButton(loginButton, isLoggedIn) {
+    if (!loginButton) return;
+    
+    if (isLoggedIn) {
+        loginButton.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg> התנתק';
+        loginButton.className = 'btn flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-full font-semibold shadow hover:bg-red-600 transition';
+    } else {
+        loginButton.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg> התחבר';
+        loginButton.className = 'btn flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-full font-semibold shadow hover:bg-green-600 transition';
+    }
+    
+    loginButton.setAttribute('onclick', 'handleLoginButtonClick()');
+}
+
+function updateUserInfo(userInfoBar, userDisplayName, userAvatar, user) {
+    if (userInfoBar) {
+        userInfoBar.classList.remove('hidden');
+        userInfoBar.style.display = 'block';
+    }
+    
+    if (userDisplayName) {
+        userDisplayName.textContent = user.displayName || user.email || 'משתמש';
+    }
+    
+    if (userAvatar) {
+        const avatarUrl = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email || 'User')}&background=3B82F6&color=fff`;
+        userAvatar.src = avatarUrl;
+    }
+}
+
+function hideUserInfo(userInfoBar) {
+    if (userInfoBar) {
+        userInfoBar.classList.add('hidden');
+        userInfoBar.style.display = 'none';
+    }
+}
+
+function hideAuthModal() {
+    const authModal = document.getElementById('authModal');
+    if (authModal && authModal.classList.contains('flex')) {
+        authModal.classList.remove('flex');
+        authModal.classList.add('hidden');
+    }
+}
 
 window.loadFromLocalStorage = function() {
     console.log('Loading from local storage...');
@@ -398,10 +396,8 @@ window.loadFromLocalStorage = function() {
 };
 
 window.loadRecords = function() {
-    console.log('Loading records...');
-    if (typeof loadFromLocalStorage === 'function') {
-        loadFromLocalStorage();
-    }
+    // אל תטען כאן - onAuthStateChanged כבר טוען את הנתונים
+    console.log('loadRecords called - data loading handled by auth state change');
 };
 
 // טעינת נתונים מ-Firestore
