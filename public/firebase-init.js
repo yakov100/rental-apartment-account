@@ -74,18 +74,36 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // התחל מעקב אחר מצב האימות
         firebase.auth().onAuthStateChanged((user) => {
-            if (typeof updateUserUI === 'function') {
-                updateUserUI(user);
-            }
+            console.log('Auth state changed:', user ? 'User logged in' : 'User logged out');
+            
+            // עדכן UI תמיד
+            setTimeout(() => {
+                if (typeof updateUserUI === 'function') {
+                    updateUserUI(user);
+                }
+            }, 100);
             
             if (user) {
                 // משתמש מחובר - טען נתונים מ-Firestore
-                loadFromFirestore();
+                console.log('Loading data from Firestore for user:', user.uid);
+                setTimeout(() => loadFromFirestore(), 500);
             } else {
                 // משתמש לא מחובר - טען נתונים מקומיים
-                loadFromLocalStorage();
+                console.log('Loading data from local storage');
+                setTimeout(() => loadFromLocalStorage(), 100);
             }
         });
+        
+        // בדוק מצב משתמש נוכחי
+        setTimeout(() => {
+            const currentUser = firebase.auth().currentUser;
+            if (currentUser) {
+                console.log('Current user found on startup:', currentUser.uid);
+                if (typeof updateUserUI === 'function') {
+                    updateUserUI(currentUser);
+                }
+            }
+        }, 1000);
         
         console.log('Firebase אותחל בהצלחה');
     } catch (error) {
@@ -279,33 +297,59 @@ window.getFamilyColor = function(familyName) {
 
 // פונקציות נוספות שחסרות
 window.updateUserUI = function(user) {
+    console.log('updateUserUI called with user:', user);
+    
     const loginButton = document.getElementById('loginButton');
     const userInfoBar = document.getElementById('userInfoBar');
     const userDisplayName = document.getElementById('userDisplayName');
     const userAvatar = document.getElementById('userAvatar');
     
-    if (user) {
+    if (user && user.uid) {
         // משתמש מחובר
+        console.log('User is logged in:', user.uid);
+        
         if (loginButton) {
             loginButton.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg> התנתק';
             loginButton.onclick = () => window.handleLogout();
+            loginButton.className = loginButton.className.replace('bg-green-500', 'bg-red-500').replace('hover:bg-green-600', 'hover:bg-red-600');
         }
         
-        if (userInfoBar) userInfoBar.classList.remove('hidden');
-        if (userDisplayName) userDisplayName.textContent = user.displayName || user.email || 'משתמש';
-        if (userAvatar) userAvatar.src = user.photoURL || 'https://via.placeholder.com/32x32?text=👤';
+        if (userInfoBar) {
+            userInfoBar.classList.remove('hidden');
+            userInfoBar.style.display = 'block';
+        }
+        if (userDisplayName) {
+            userDisplayName.textContent = user.displayName || user.email || 'משתמש';
+        }
+        if (userAvatar) {
+            userAvatar.src = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || user.email || 'User') + '&background=3B82F6&color=fff';
+        }
         
-        console.log('User logged in:', user.uid);
+        // הסתר מודל האימות אם פתוח
+        const authModal = document.getElementById('authModal');
+        if (authModal) {
+            authModal.classList.remove('flex');
+            authModal.classList.add('hidden');
+        }
+        
+        if (typeof showToast === 'function') {
+            showToast('ברוך הבא, ' + (user.displayName || user.email || 'משתמש'), 'success');
+        }
+        
     } else {
         // משתמש לא מחובר
+        console.log('User is logged out');
+        
         if (loginButton) {
             loginButton.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg> התחבר';
             loginButton.onclick = () => window.showAuthModal();
+            loginButton.className = loginButton.className.replace('bg-red-500', 'bg-green-500').replace('hover:bg-red-600', 'hover:bg-green-600');
         }
         
-        if (userInfoBar) userInfoBar.classList.add('hidden');
-        
-        console.log('User logged out');
+        if (userInfoBar) {
+            userInfoBar.classList.add('hidden');
+            userInfoBar.style.display = 'none';
+        }
     }
 };
 
