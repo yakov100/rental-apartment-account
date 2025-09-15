@@ -1,34 +1,32 @@
-// ניהול אימות משתמשים
-import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signInWithPopup, 
-  GoogleAuthProvider,
-  signOut,
-  onAuthStateChanged 
-} from 'firebase/auth';
-import { auth } from './firebase-config.js';
+// ניהול אימות משתמשים - Firebase v8 Compat
+// נשתמש ב-Firebase v8 שכבר נטען בדף
 
-const googleProvider = new GoogleAuthProvider();
 let currentUser = null;
 
-// פונקציות אימות
+// פונקציות אימות - Firebase v8 Compat
 export const signInWithGoogle = async () => {
   try {
-    const result = await signInWithPopup(auth, googleProvider);
-    showToast('התחברת בהצלחה!', 'success');
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const result = await firebase.auth().signInWithPopup(provider);
+    if (typeof showToast === 'function') {
+      showToast('התחברת בהצלחה!', 'success');
+    }
     return result.user;
   } catch (error) {
     console.error('שגיאת התחברות Google:', error);
-    showToast('שגיאה בהתחברות עם Google', 'error');
+    if (typeof showToast === 'function') {
+      showToast('שגיאה בהתחברות עם Google', 'error');
+    }
     throw error;
   }
 };
 
 export const signInWithEmail = async (email, password) => {
   try {
-    const result = await signInWithEmailAndPassword(auth, email, password);
-    showToast('התחברת בהצלחה!', 'success');
+    const result = await firebase.auth().signInWithEmailAndPassword(email, password);
+    if (typeof showToast === 'function') {
+      showToast('התחברת בהצלחה!', 'success');
+    }
     return result.user;
   } catch (error) {
     console.error('שגיאת התחברות:', error);
@@ -46,15 +44,19 @@ export const signInWithEmail = async (email, password) => {
         break;
     }
     
-    showToast(errorMessage, 'error');
+    if (typeof showToast === 'function') {
+      showToast(errorMessage, 'error');
+    }
     throw error;
   }
 };
 
 export const registerWithEmail = async (email, password) => {
   try {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
-    showToast('נרשמת בהצלחה!', 'success');
+    const result = await firebase.auth().createUserWithEmailAndPassword(email, password);
+    if (typeof showToast === 'function') {
+      showToast('נרשמת בהצלחה!', 'success');
+    }
     return result.user;
   } catch (error) {
     console.error('שגיאת הרשמה:', error);
@@ -72,26 +74,34 @@ export const registerWithEmail = async (email, password) => {
         break;
     }
     
-    showToast(errorMessage, 'error');
+    if (typeof showToast === 'function') {
+      showToast(errorMessage, 'error');
+    }
     throw error;
   }
 };
 
 export const logout = async () => {
   try {
-    await signOut(auth);
-    showToast('התנתקת בהצלחה', 'success');
+    await firebase.auth().signOut();
+    if (typeof showToast === 'function') {
+      showToast('התנתקת בהצלחה', 'success');
+    }
   } catch (error) {
     console.error('שגיאת התנתקות:', error);
-    showToast('שגיאה בהתנתקות', 'error');
+    if (typeof showToast === 'function') {
+      showToast('שגיאה בהתנתקות', 'error');
+    }
   }
 };
 
 // מעקב אחר מצב המשתמש
 export const onAuthChange = (callback) => {
-  return onAuthStateChanged(auth, (user) => {
+  return firebase.auth().onAuthStateChanged((user) => {
     currentUser = user;
-    callback(user);
+    if (typeof callback === 'function') {
+      callback(user);
+    }
   });
 };
 
@@ -107,23 +117,37 @@ export const requireAuth = () => {
 
 // UI של התחברות
 export const showLoginModal = () => {
-  document.getElementById('authModal').classList.remove('hidden');
-  document.getElementById('authModal').classList.add('flex');
+  const modal = document.getElementById('authModal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
 };
 
 export const hideLoginModal = () => {
-  document.getElementById('authModal').classList.remove('flex');
-  document.getElementById('authModal').classList.add('hidden');
+  const modal = document.getElementById('authModal');
+  if (modal) {
+    modal.classList.remove('flex');
+    modal.classList.add('hidden');
+  }
 };
 
 export const showRegisterForm = () => {
-  document.getElementById('loginForm').classList.add('hidden');
-  document.getElementById('registerForm').classList.remove('hidden');
-  document.getElementById('authModalTitle').textContent = 'הרשמה למערכת';
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const title = document.getElementById('authModalTitle');
+  
+  if (loginForm) loginForm.classList.add('hidden');
+  if (registerForm) registerForm.classList.remove('hidden');
+  if (title) title.textContent = 'הרשמה למערכת';
 };
 
 export const showLoginForm = () => {
-  document.getElementById('registerForm').classList.add('hidden');
-  document.getElementById('loginForm').classList.remove('hidden');
-  document.getElementById('authModalTitle').textContent = 'התחברות למערכת';
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const title = document.getElementById('authModalTitle');
+  
+  if (registerForm) registerForm.classList.add('hidden');
+  if (loginForm) loginForm.classList.remove('hidden');
+  if (title) title.textContent = 'התחברות למערכת';
 };

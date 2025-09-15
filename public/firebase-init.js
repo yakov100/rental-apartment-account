@@ -5,29 +5,42 @@ document.addEventListener('DOMContentLoaded', async function() {
         await loadFirebaseModules();
         
         // התחל מעקב אחר מצב ההתחברות
-        window.authModule.onAuthChange(updateUserUI);
+        if (window.authModule && window.authModule.onAuthChange) {
+            window.authModule.onAuthChange(updateUserUI);
+        }
         
         console.log('Firebase אותחל בהצלחה');
     } catch (error) {
         console.error('שגיאה באתחול Firebase:', error);
-        showToast('שגיאה בחיבור למערכת - מעבר למצב אופליין', 'warning');
+        if (typeof showToast === 'function') {
+            showToast('שגיאה בחיבור למערכת - מעבר למצב אופליין', 'warning');
+        }
         
         // אתחול בלי Firebase
-        updateUserUI(null);
-        loadFromLocalStorage();
+        if (typeof updateUserUI === 'function') {
+            updateUserUI(null);
+        }
+        if (typeof loadFromLocalStorage === 'function') {
+            loadFromLocalStorage();
+        }
     }
 });
 
 async function loadFirebaseModules() {
-    // טען מודולי Firebase בסדר הנכון
-    const authModule = await import('./auth.js');
-    const firebaseData = await import('./firebase-data.js');
-    
-    // הפוך אותם זמינים גלובלית
-    window.authModule = authModule;
-    window.firebaseData = firebaseData;
-    
-    return { authModule, firebaseData };
+    try {
+        // טען מודולי Firebase בסדר הנכון
+        const authModule = await import('./auth.js');
+        const firebaseData = await import('./firebase-data.js');
+        
+        // הפוך אותם זמינים גלובלית
+        window.authModule = authModule;
+        window.firebaseData = firebaseData;
+        
+        return { authModule, firebaseData };
+    } catch (error) {
+        console.warn('לא ניתן לטעון מודולי Firebase:', error);
+        return null;
+    }
 }
 
 // פונקציות עבור מצב חיבור
@@ -49,3 +62,46 @@ window.addEventListener('offline', () => updateConnectionStatus(false));
 
 // עדכון ראשוני
 updateConnectionStatus(navigator.onLine);
+
+// פונקציה להצגת הודעות
+function showToast(message, type = 'info') {
+    // יצירת אלמנט ההודעה
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-medium transition-all duration-300 transform translate-x-full`;
+    
+    // צבעים לפי סוג ההודעה
+    switch(type) {
+        case 'success':
+            toast.className += ' bg-green-500';
+            break;
+        case 'error':
+            toast.className += ' bg-red-500';
+            break;
+        case 'warning':
+            toast.className += ' bg-yellow-500';
+            break;
+        default:
+            toast.className += ' bg-blue-500';
+    }
+    
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    // אנימציה כניסה
+    setTimeout(() => {
+        toast.classList.remove('translate-x-full');
+    }, 100);
+    
+    // הסרה אוטומטית אחרי 3 שניות
+    setTimeout(() => {
+        toast.classList.add('translate-x-full');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// הפוך את הפונקציה זמינה גלובלית
+window.showToast = showToast;
