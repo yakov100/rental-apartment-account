@@ -3,7 +3,39 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
     function isAdmin() { return signedIn() && request.auth.token.role == 'admin'; }
+    function isAuthorizedAdmin() { 
+      return signedIn() && (
+        request.auth.token.email == 'yafried100@gmail.com'
+        // הוסף כאן emails נוספים של מנהלים מורשים
+        // || request.auth.token.email == 'manager2@example.com'
+        // || request.auth.token.email == 'owner@company.com'
+      );
+    }
+    function isAdminOrAuthorized() { return isAdmin() || isAuthorizedAdmin(); }
     function isSelf(userId) { return signedIn() && request.auth.uid == userId; }
+
+    // כללים גלובליים לנתונים קיימים
+    match /records/{recordId} {
+      allow read, write: if signedIn();
+      allow update: if signedIn(); // מאפשר עדכון paid status
+      allow delete: if isAdminOrAuthorized();
+    }
+    
+    match /familyNames/{docId} {
+      allow read, write: if signedIn();
+    }
+    
+    match /rates/{docId} {
+      allow read, write: if signedIn();
+    }
+    
+    match /familyColors/{docId} {
+      allow read, write: if signedIn();
+    }
+    
+    match /familyProfiles/{docId} {
+      allow read, write: if signedIn();
+    }
 
     match /users/{userId} {
       // Read access to own subtree or admin
@@ -19,15 +51,16 @@ service cloud.firestore {
           && request.resource.data.currentReading >= request.resource.data.previousReading
           && (!('paid' in request.resource.data) || request.resource.data.paid == false);
 
-        // Update: owner can edit usage-related fields only; admin full
+        // Update: owner can edit usage-related fields only; admin can edit all
+        // רק מנהלים מורשים יכולים לעדכן את השדה paid
         allow update: if (
           isSelf(userId)
           && request.resource.data.userId == resource.data.userId
           && request.resource.data.paid == resource.data.paid
-        ) || isAdmin();
+        ) || isAdminOrAuthorized();
 
-        // Delete: admin only
-        allow delete: if isAdmin();
+        // Delete: admin or authorized admin only
+        allow delete: if isAdminOrAuthorized();
 
         // Read for owners already covered; admin full
         allow read: if isSelf(userId) || isAdmin();
@@ -35,28 +68,8 @@ service cloud.firestore {
 
       match /settings/{docId} {
         // Owner or admin can read/write settings; delete only admin
-        allow read, create, update: if isSelf(userId) || isAdmin();
-        allow delete: if isAdmin();
-      }
-    }
-  }
-}
-
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // כללי אבטחה - רק משתמשים מחוברים יכולים לגשת לנתונים שלהם
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      
-      // רשומות צריכה
-      match /records/{recordId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-      
-      // הגדרות משתמש
-      match /settings/{settingId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read, create, update: if isSelf(userId) || isAdminOrAuthorized();
+        allow delete: if isAdminOrAuthorized();
       }
       
       // משפחות

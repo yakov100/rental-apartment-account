@@ -13,21 +13,22 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-purple-100 min-h-screen">
+<body class="bg-gradient-to-br from-blue-50 to-purple-100 min-h-screen overflow-x-hidden">
     <!-- Header -->
     <header class="w-full py-8 bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg mb-8">
         <div class="container mx-auto flex flex-col md:flex-row items-center justify-between px-4">
             <div class="flex items-center gap-3">
-                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M16 3v4M8 3v4m-5 4h18"/></svg>
-                <h1 class="text-4xl font-extrabold text-white tracking-tight">ניהול צריכה יחידות</h1>
-            </div>
-            <div class="flex items-center gap-2">
                 <button id="sidebarToggle" onclick="toggleSidebar()" class="btn flex items-center gap-2 px-3 py-2 bg-white bg-opacity-20 text-white rounded-full font-semibold shadow hover:bg-opacity-30 transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
+                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M16 3v4M8 3v4m-5 4h18"/></svg>
+                <h1 class="text-4xl font-extrabold text-white tracking-tight">ניהול צריכה יחידות</h1>
+            </div>
+            <div class="flex items-center gap-2">
                 <button id="loginButton" onclick="showAuthModal()" class="btn flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-full font-semibold shadow hover:bg-green-600 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
@@ -53,22 +54,21 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                     הוסף משפחה
                 </button>
+                <button onclick="showEditFamilyModal(); toggleSidebar();" class="w-full btn flex items-center gap-3 px-5 py-3 bg-orange-500 text-white rounded-lg font-semibold shadow hover:bg-orange-600 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    ערוך משפחות
+                </button>
                 <button onclick="showReportModal(); toggleSidebar();" class="w-full btn flex items-center gap-3 px-5 py-3 bg-purple-500 text-white rounded-lg font-semibold shadow hover:bg-purple-600 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m-6 0h6"/></svg>
                     דוח חודשי/שנתי
                 </button>
+                <button onclick="showDebtsModal(); toggleSidebar();" class="w-full btn flex items-center gap-3 px-5 py-3 bg-red-500 text-white rounded-lg font-semibold shadow hover:bg-red-600 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
+                    חישוב חובות לפי משפחה
+                </button>
                 <button onclick="exportToCSV(); toggleSidebar();" class="w-full btn flex items-center gap-3 px-5 py-3 bg-blue-500 text-white rounded-lg font-semibold shadow hover:bg-blue-600 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10V6a5 5 0 0110 0v4"/></svg>
                     ייצוא ל-CSV
-                </button>
-                <button onclick="backupData(); toggleSidebar();" class="w-full btn flex items-center gap-3 px-5 py-3 bg-yellow-400 text-gray-900 rounded-lg font-semibold shadow hover:bg-yellow-500 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    גיבוי נתונים
-                </button>
-                <input type="file" id="restoreFileInput" accept="application/json" style="display:none" onchange="restoreDataFromFile(event)">
-                <button onclick="document.getElementById('restoreFileInput').click(); toggleSidebar();" class="w-full btn flex items-center gap-3 px-5 py-3 bg-gray-700 text-white rounded-lg font-semibold shadow hover:bg-gray-800 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v16h16V4H4zm4 4h8v8H8V8z"/></svg>
-                    שחזור נתונים
                 </button>
                 <button id="btnRates" onclick="showRatesModal(); toggleSidebar();" class="w-full btn flex items-center gap-3 px-5 py-3 bg-indigo-500 text-white rounded-lg font-semibold shadow hover:bg-indigo-600 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -81,14 +81,14 @@
     <!-- Sidebar Overlay -->
     <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40" onclick="toggleSidebar()"></div>
 
-    <main class="container mx-auto px-4">
+    <main class="container mx-auto px-4 pb-8">
         <!-- Floating Action Button (FAB) -->
         <button id="fabAddRecord" onclick="openAddRecordModal()" class="fixed bottom-8 left-8 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg w-16 h-16 flex items-center justify-center text-4xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300">
             <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
         </button>
         <!-- Add/Edit Record Modal -->
-        <div id="addRecordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50">
-            <div class="bg-white dark:bg-[#23263a] p-8 rounded-2xl shadow-2xl max-w-2xl w-full relative">
+        <div id="addRecordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50 overflow-y-auto">
+            <div class="bg-white dark:bg-[#23263a] p-8 rounded-2xl shadow-2xl max-w-2xl w-full relative my-8">
                 <button onclick="closeAddRecordModal()" class="absolute top-4 left-4 text-gray-400 hover:text-red-500 text-2xl font-bold">&times;</button>
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2"><svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>הוספת/עריכת רשומה</h2>
                 <form id="recordForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -141,8 +141,8 @@
         <!-- Table -->
         <section class="bg-white rounded-2xl shadow-xl p-8 mb-8">
             <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2"><svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M16 3v4M8 3v4m-5 4h18"/></svg>רשימת רשומות</h2>
-            <div id="table-container" class="w-full overflow-x-auto">
-                <table class="w-full text-right border-collapse rounded-xl overflow-hidden shadow">
+            <div id="table-container" class="w-full overflow-x-auto overflow-y-visible">
+                <table class="w-full text-right border-collapse rounded-xl overflow-hidden shadow min-w-full">
                     <thead>
                         <tr class="bg-gradient-to-r from-blue-100 to-purple-100 text-gray-700 uppercase text-sm leading-normal">
                             <th class="py-3 px-6 text-right">שם משפחה</th>
@@ -182,7 +182,7 @@
             </div>
         </section>
         <!-- Stats Cards -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center">
                 <div class="bg-red-100 text-red-600 rounded-full p-3 mb-2"><svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></div>
                 <div class="text-2xl font-bold" id="statUnpaid">0</div>
@@ -198,18 +198,23 @@
                 <div class="text-2xl font-bold" id="statTotalRecords">0</div>
                 <div class="text-gray-500">סה"כ רשומות</div>
             </div>
+            <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center">
+                <div class="bg-orange-100 text-orange-600 rounded-full p-3 mb-2"><svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg></div>
+                <div class="text-2xl font-bold" id="statTotalDebt">0 ₪</div>
+                <div class="text-gray-500">סך חובות</div>
+            </div>
         </section>
     </main>
     <!-- Message Box Modal -->
-    <div id="messageModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50">
-        <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm w-full">
+    <div id="messageModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm w-full my-8">
             <p id="modalMessage" class="text-lg font-medium text-gray-800 mb-4"></p>
             <button onclick="closeModal()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">סגור</button>
         </div>
     </div>
     <!-- Modal for adding a new family -->
-    <div id="addFamilyModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50">
-        <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm w-full">
+    <div id="addFamilyModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm w-full my-8">
             <h3 class="text-xl font-semibold mb-4">הוספת משפחה חדשה</h3>
             <input type="text" id="newFamilyNameInput" placeholder="הקלד שם משפחה" class="p-2 border border-gray-300 rounded-md w-full mb-3">
             <div class="text-right space-y-3 mb-1">
@@ -232,9 +237,74 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal for editing existing families -->
+    <div id="editFamilyModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white dark:bg-[#23263a] p-6 rounded-lg shadow-xl max-w-2xl w-full my-8">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">עריכת משפחות</h3>
+                <button onclick="closeEditFamilyModal()" class="text-gray-400 hover:text-red-500 text-2xl font-bold">&times;</button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                    <h4 class="font-semibold text-blue-800 dark:text-blue-200 mb-2">📋 רשימת משפחות</h4>
+                    <p class="text-sm text-blue-700 dark:text-blue-300">לחץ על משפחה כדי לערוך את פרטיה</p>
+                </div>
+                
+                <div id="familiesList" class="max-h-96 overflow-y-auto space-y-2">
+                    <!-- Families will be dynamically inserted here -->
+                </div>
+            </div>
+            
+            <div class="flex justify-end gap-2 mt-6">
+                <button onclick="closeEditFamilyModal()" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">סגור</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for editing a specific family -->
+    <div id="editSpecificFamilyModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white dark:bg-[#23263a] p-6 rounded-lg shadow-xl max-w-md w-full my-8">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">עריכת פרטי משפחה</h3>
+                <button onclick="closeEditSpecificFamilyModal()" class="text-gray-400 hover:text-red-500 text-2xl font-bold">&times;</button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="flex flex-col">
+                    <label for="editFamilyNameInput" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">שם משפחה</label>
+                    <input type="text" id="editFamilyNameInput" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div class="flex flex-col">
+                    <label for="editFamilyEntryDateInput" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">תאריך כניסה לדירה</label>
+                    <input type="date" id="editFamilyEntryDateInput" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div class="flex flex-col">
+                    <label for="editFamilyPhonesInput" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">טלפונים</label>
+                    <input type="text" id="editFamilyPhonesInput" placeholder="הפרד במספרים בפסיקים" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div class="flex flex-col">
+                    <label for="editFamilyEmailInput" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">אימייל</label>
+                    <input type="email" id="editFamilyEmailInput" placeholder="name@example.com" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            
+            <div class="flex justify-between gap-2 mt-6">
+                <button onclick="deleteFamily()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">מחק משפחה</button>
+                <div class="flex gap-2">
+                    <button onclick="saveFamilyChanges()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">שמור שינויים</button>
+                    <button onclick="closeEditSpecificFamilyModal()" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">בטל</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Report Modal -->
-    <div id="reportModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50">
-        <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-2xl w-full overflow-auto">
+    <div id="reportModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white p-6 rounded-lg shadow-xl text-center max-w-2xl w-full overflow-auto my-8">
             <h3 class="text-xl font-semibold mb-4">דוח חודשי/שנתי</h3>
             <div class="flex flex-col md:flex-row gap-2 mb-4">
                 <select id="reportFamily" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -252,9 +322,85 @@
             <button onclick="closeReportModal()" class="mt-4 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">סגור</button>
         </div>
     </div>
+    
+    <!-- Debts Modal -->
+    <div id="debtsModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden items-center justify-center p-4 z-50 overflow-y-auto backdrop-blur-sm">
+        <div class="bg-white dark:bg-[#23263a] p-8 rounded-2xl shadow-2xl max-w-6xl w-full overflow-auto my-8 border border-gray-200 dark:border-gray-700">
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center gap-4">
+                    <div class="bg-gradient-to-r from-red-500 to-red-600 p-3 rounded-xl shadow-lg">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-bold text-gray-800 dark:text-gray-100">חישוב חובות לפי משפחה</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mt-1">ניהול ומעקב אחר חובות המשפחות</p>
+                    </div>
+                </div>
+                <button onclick="closeDebtsModal()" class="text-gray-400 hover:text-red-500 text-3xl font-bold transition-colors duration-200 p-2 hover:bg-gray-100 rounded-full">&times;</button>
+            </div>
+            <div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 p-6 rounded-xl mb-8 border border-gray-200 dark:border-gray-600">
+                <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                    </svg>
+                    סינון נתונים
+                </h4>
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">בחר משפחה</label>
+                        <select id="debtFamilyFilter" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent shadow-sm bg-white dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                            <option value="">כל המשפחות</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">סוג חשבון</label>
+                        <select id="debtBillTypeFilter" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent shadow-sm bg-white dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                            <option value="">כל סוגי החשבונות</option>
+                            <option value="חשמל">⚡ חשמל</option>
+                            <option value="מים">💧 מים</option>
+                            <option value="ארנונה">🏛️ ארנונה</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div id="debtsTableContainer" class="overflow-x-auto">
+                <!-- החובות יוצגו כאן -->
+            </div>
+            <div class="flex flex-col md:flex-row justify-between gap-4 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="exportDebtsToCSV()" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10V6a5 5 0 0110 0v4"/>
+                        </svg>
+                        ייצא ל-CSV
+                    </button>
+                    <button onclick="showMonthlyDebtsReport()" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        דוח חודשי
+                    </button>
+                    <button id="markAllDebtsAsPaidBtn" onclick="markAllDebtsAsPaid()" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        סמן הכל כשולם
+                    </button>
+                </div>
+                <button onclick="closeDebtsModal()" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-gray-400 to-gray-500 text-white font-semibold rounded-xl hover:from-gray-500 hover:to-gray-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    סגור
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- Rates Modal -->
-    <div id="ratesModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50">
-        <div class="bg-white dark:bg-[#23263a] p-6 rounded-lg shadow-xl text-center max-w-md w-full">
+    <div id="ratesModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white dark:bg-[#23263a] p-6 rounded-lg shadow-xl text-center max-w-md w-full my-8">
             <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">הגדרות תעריפים</h3>
             <div class="space-y-4 text-right">
                 <div class="flex flex-col">
@@ -277,8 +423,8 @@
         </div>
     </div>
     <!-- Auth Modal -->
-    <div id="authModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50">
-        <div class="bg-white dark:bg-[#23263a] p-6 rounded-lg shadow-xl max-w-md w-full">
+    <div id="authModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white dark:bg-[#23263a] p-6 rounded-lg shadow-xl max-w-md w-full my-8">
             <div class="flex justify-between items-center mb-4">
                 <h3 id="authModalTitle" class="text-xl font-semibold text-gray-800 dark:text-gray-100">התחברות למערכת</h3>
                 <button onclick="hideAuthModal()" class="text-gray-400 hover:text-red-500 text-2xl font-bold">&times;</button>
@@ -334,6 +480,10 @@
         </div>
     </div>
 
+
+
+
+
     <!-- User Info Bar -->
     <div id="userInfoBar" class="hidden bg-blue-50 dark:bg-blue-900 border-b border-blue-200 dark:border-blue-700 px-4 py-2">
         <div class="flex justify-between items-center max-w-7xl mx-auto">
@@ -346,8 +496,8 @@
         </div>
     </div>
 
-    <script src="firebase-init.js"></script>
-    <script src="firebase-data-compat.js"></script>
-    <script src="app.js"></script>
+    <script src="firebase-init.js?v=3"></script>
+    <script src="firebase-data-compat.js?v=3"></script>
+    <script src="app.js?v=4"></script>
 </body>
 </html>

@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "firebase deploy": "rental-apartment-account"
+  },
+  "targets": {},
+  "etags": {}
+}

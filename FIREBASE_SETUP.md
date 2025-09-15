@@ -7,7 +7,7 @@
 3. תן שם לפרויקט (למשל: "units-consumption-manager")
 4. בחר אם לאפשר Google Analytics (לא חובה)
 5. לחץ "Create project"
-
+ 
 ## שלב 2: הגדרת Authentication
 
 1. בתפריט השמאלי, לחץ על "Authentication"
